@@ -34,3 +34,6 @@ jobs:
 
       - name: Cek status
         run: pm2 status
+
+      - name: Reload Nginx
+        run: sudo systemctl reload nginx
