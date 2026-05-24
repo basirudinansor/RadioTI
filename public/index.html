@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radio Teknologi Informasi — Streaming 24 Jam</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.9.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #1E6FD9; --cyan: #00B4D8; --navy: #0A1628;
+    --navy2: #0D1F3C; --navy3: #132847; --navy4: #1A3560;
+    --accent: #00D4FF; --pink: #FF6B9D; --amber: #FFB627;
+    --teal: #00C9A7; --text: rgba(255,255,255,0.92);
+    --muted: rgba(255,255,255,0.5); --faint: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.09);
+  }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--navy); color: var(--text); min-height: 100vh; }
+
+  /* LAYOUT */
+  .layout { display: grid; grid-template-columns: 290px 1fr 290px; min-height: 100vh; }
+  .sidebar-left { background: var(--navy2); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+  .main { display: flex; flex-direction: column; }
+  .sidebar-right { background: var(--navy2); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+
+  /* TOPBAR */
+  .topbar { background: var(--navy3); border-bottom: 1px solid var(--border); padding: 13px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .logo-wrap { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, var(--blue), var(--cyan)); display: flex; align-items: center; justify-content: center; }
+  .logo-icon i { font-size: 20px; color: white; }
+  .logo-text { line-height: 1.2; }
+  .logo-name { font-size: 14px; font-weight: 700; color: white; }
+  .logo-tagline { font-size: 10px; color: var(--muted); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .listener-badge { display: flex; align-items: center; gap: 6px; background: var(--faint); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--muted); }
+  .listener-badge i { color: var(--accent); font-size: 14px; }
+  .live-pill { display: flex; align-items: center; gap: 5px; background: rgba(255,59,59,0.15); border: 1px solid rgba(255,59,59,0.3); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: #FF9090; }
+  .live-dot { width: 7px; height: 7px; background: #FF3B3B; border-radius: 50%; animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .conn-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); }
+  .conn-dot.offline { background: #FF3B3B; }
+
+  /* HERO */
+  .hero { background: linear-gradient(160deg, #0A1628 0%, #0D2B5E 35%, #1E4D8C 65%, #00B4D8 100%); padding: 2rem; position: relative; overflow: hidden; flex-shrink: 0; }
+  .hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle, rgba(0,212,255,0.15) 0%, transparent 70%); }
+  .hero::after { content: ''; position: absolute; bottom: -40px; left: -40px; width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle, rgba(30,111,217,0.2) 0%, transparent 70%); }
+  .hero-inner { position: relative; z-index: 1; }
+
+  .now-playing-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 16px; }
+  .album-art { width: 72px; height: 72px; border-radius: 12px; background: linear-gradient(135deg, #1E6FD9, #00B4D8); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; overflow: hidden; }
+  .album-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.1)); }
+  .album-art i { font-size: 32px; color: white; }
+  .song-meta .label { font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+  .song-title { font-size: 19px; font-weight: 600; color: white; margin-bottom: 2px; }
+  .song-artist { font-size: 13px; color: rgba(255,255,255,0.7); }
+  .eq-wrap { display: flex; align-items: flex-end; gap: 3px; height: 28px; margin-left: auto; }
+  .eq-bar { width: 4px; border-radius: 2px; background: var(--accent); opacity: 0.8; }
+
+  /* PROGRESS */
+  .progress-wrap { margin-bottom: 1.5rem; }
+  .progress-bar { width: 100%; height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--accent)); border-radius: 2px; transition: width 1s linear; }
+  .progress-times { display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,0.45); }
+
+  /* CONTROLS */
+  .controls { display: flex; align-items: center; gap: 14px; }
+  .btn-play { width: 58px; height: 58px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--accent)); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 20px rgba(0,180,216,0.4); }
+  .btn-play:hover { transform: scale(1.06); box-shadow: 0 6px 24px rgba(0,180,216,0.5); }
+  .btn-play i { font-size: 24px; color: white; }
+  .vol-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
+  .vol-wrap i { font-size: 17px; color: rgba(255,255,255,0.5); flex-shrink: 0; }
+  input[type=range].vol { flex: 1; -webkit-appearance: none; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; outline: none; cursor: pointer; }
+  input[type=range].vol::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: white; cursor: pointer; }
+  .btn-icon { width: 34px; height: 34px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: rgba(255,255,255,0.7); font-size: 15px; transition: background 0.2s; }
+  .btn-icon:hover { background: rgba(255,255,255,0.2); }
+
+  /* SIDEBAR HEADER */
+  .section-head { padding: 14px 18px 10px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+  .section-head i { font-size: 13px; color: var(--accent); }
+
+  /* PLAYLIST */
+  .playlist { overflow-y: auto; flex: 1; }
+  .playlist-item { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--faint); cursor: pointer; transition: background 0.15s; }
+  .playlist-item:hover { background: var(--faint); }
+  .playlist-item.active { background: rgba(0,180,216,0.1); border-left: 3px solid var(--accent); padding-left: 11px; }
+  .pl-num { font-size: 11px; color: var(--muted); width: 18px; text-align: center; flex-shrink: 0; }
+  .pl-art { width: 38px; height: 38px; border-radius: 7px; background: linear-gradient(135deg, var(--navy4), var(--blue)); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pl-art i { font-size: 17px; color: rgba(255,255,255,0.6); }
+  .pl-info { flex: 1; min-width: 0; }
+  .pl-title { font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pl-artist { font-size: 11px; color: var(--muted); }
+  .pl-meta { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .pl-dur { font-size: 10px; color: var(--muted); }
+  .pl-vote { display: flex; align-items: center; gap: 3px; font-size: 11px; color: var(--pink); cursor: pointer; }
+  .pl-vote i { font-size: 12px; }
+
+  /* TABS */
+  .tabs { display: flex; background: var(--navy3); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .tab { flex: 1; padding: 12px 8px; font-size: 11px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; text-align: center; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab i { font-size: 14px; }
+
+  /* PANELS */
+  .panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+  .panel.active { display: flex; }
+  .panel-scroll { flex: 1; overflow-y: auto; padding: 14px; }
+
+  /* SCHEDULE */
+  .sch-item { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--faint); }
+  .sch-item:last-child { border-bottom: none; }
+  .sch-time { font-size: 11px; color: var(--amber); font-weight: 600; min-width: 46px; margin-top: 2px; }
+  .sch-body { flex: 1; }
+  .sch-show { font-size: 13px; font-weight: 500; color: var(--text); }
+  .sch-dj { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .sch-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 10px; margin-top: 4px; }
+  .sch-badge.on-air { background: rgba(255,59,59,0.15); color: #FF9090; }
+  .sch-badge.next { background: rgba(255,182,39,0.15); color: var(--amber); }
+  .sch-badge.done { background: rgba(255,255,255,0.05); color: var(--muted); }
+
+  /* REQUEST */
+  .req-form { background: var(--navy3); border-radius: 10px; padding: 13px; margin-bottom: 14px; border: 1px solid var(--border); }
+  .req-form input, .req-form textarea { width: 100%; background: var(--faint); border: 1px solid var(--border); border-radius: 7px; padding: 8px 11px; color: var(--text); font-size: 12px; font-family: inherit; outline: none; margin-bottom: 7px; }
+  .req-form input::placeholder, .req-form textarea::placeholder { color: var(--muted); }
+  .req-form input:focus, .req-form textarea:focus { border-color: var(--accent); }
+  .req-form textarea { resize: none; height: 56px; }
+  .btn-submit { width: 100%; background: linear-gradient(135deg, var(--blue), var(--cyan)); border: none; border-radius: 7px; padding: 9px; color: white; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .req-list-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .req-item { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--faint); }
+  .req-item:last-child { border-bottom: none; }
+  .req-song { font-size: 12px; color: var(--text); }
+  .req-from { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .req-vote-btn { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--pink); cursor: pointer; background: rgba(255,107,157,0.1); border: 1px solid rgba(255,107,157,0.2); border-radius: 20px; padding: 3px 9px; transition: all 0.2s; white-space: nowrap; }
+  .req-vote-btn:hover { background: rgba(255,107,157,0.2); }
+  .req-vote-btn i { font-size: 12px; }
+
+  /* CHAT */
+  .chat-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .chat-msg { display: flex; gap: 8px; align-items: flex-start; }
+  .chat-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; color: white; }
+  .chat-bubble { background: var(--faint); border: 1px solid var(--border); border-radius: 0 10px 10px 10px; padding: 7px 11px; }
+  .chat-name { font-size: 10px; font-weight: 600; margin-bottom: 3px; }
+  .chat-text { font-size: 12px; color: var(--text); line-height: 1.4; }
+  .chat-time { font-size: 10px; color: var(--muted); margin-top: 3px; }
+  .chat-input-area { padding: 10px 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+  .chat-input { flex: 1; background: var(--faint); border: 1px solid var(--border); border-radius: 20px; padding: 8px 14px; color: var(--text); font-size: 12px; font-family: inherit; outline: none; }
+  .chat-input:focus { border-color: var(--accent); }
+  .chat-input::placeholder { color: var(--muted); }
+  .btn-send { width: 34px; height: 34px; border-radius: 50%; background: var(--blue); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .btn-send i { font-size: 14px; color: white; }
+
+  /* DJ SIDEBAR */
+  .dj-on-air { padding: 14px; border-bottom: 1px solid var(--border); }
+  .dj-on-air-label { font-size: 10px; color: #FF9090; text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 5px; margin-bottom: 10px; }
+  .dj-card { display: flex; align-items: center; gap: 12px; }
+  .dj-avatar-big { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: white; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.2); }
+  .dj-name { font-size: 15px; font-weight: 600; color: var(--text); }
+  .dj-show { font-size: 11px; color: var(--muted); }
+  .dj-bio { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+
+  .dj-list { overflow-y: auto; flex: 1; }
+  .dj-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--faint); transition: background 0.15s; }
+  .dj-item:hover { background: var(--faint); }
+  .dj-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; flex-shrink: 0; }
+  .dj-item-name { font-size: 12px; font-weight: 500; color: var(--text); }
+  .dj-item-show { font-size: 10px; color: var(--muted); }
+  .dj-item-time { font-size: 10px; color: var(--amber); margin-left: auto; white-space: nowrap; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar-left, .sidebar-right { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR KIRI: Playlist -->
+  <aside class="sidebar-left">
+    <div class="section-head"><i class="ti ti-list-numbers"></i> Playlist</div>
+    <div class="playlist" id="playlistEl"></div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="logo-wrap">
+        <div class="logo-icon"><i class="ti ti-radio"></i></div>
+        <div class="logo-text">
+          <div class="logo-name">Radio Teknologi Informasi</div>
+          <div class="logo-tagline">Streaming 24 Jam • 192.168.141.41:8000</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="conn-status">
+          <div class="conn-dot" id="connDot"></div>
+          <span id="connText">Menghubungkan...</span>
+        </div>
+        <div class="listener-badge">
+          <i class="ti ti-headphones"></i>
+          <span id="listenerCount">—</span> pendengar
+        </div>
+        <div class="live-pill"><span class="live-dot"></span> ON AIR</div>
+      </div>
+    </div>
+
+    <!-- Hero Player -->
+    <div class="hero">
+      <div class="hero-inner">
+        <div class="now-playing-card">
+          <div class="album-art"><i class="ti ti-music"></i></div>
+          <div class="song-meta">
+            <div class="label">Sedang Diputar</div>
+            <div class="song-title" id="songTitle">Radio Teknologi Informasi</div>
+            <div class="song-artist" id="songArtist">Menunggu siaran...</div>
+          </div>
+          <div class="eq-wrap" id="eqWrap"></div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+          <div class="progress-times">
+            <span id="timeElapsed">0:00</span>
+            <span id="timeDuration">Live</span>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn-play" id="playBtn" onclick="togglePlay()" aria-label="Play/Pause">
+            <i class="ti ti-player-play" id="playIcon"></i>
+          </button>
+          <div class="vol-wrap">
+            <i class="ti ti-volume"></i>
+            <input type="range" class="vol" min="0" max="100" value="80" id="volSlider" oninput="setVolume(this.value)">
+            <i class="ti ti-volume-2"></i>
+          </div>
+          <div class="btn-icon" onclick="toggleMute()" id="muteBtn" title="Mute"><i class="ti ti-volume-3"></i></div>
+          <div class="btn-icon" onclick="shareStation()" title="Bagikan"><i class="ti ti-share"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('schedule',this)"><i class="ti ti-calendar"></i> Jadwal</div>
+      <div class="tab" onclick="showTab('request',this)"><i class="ti ti-music"></i> Request</div>
+      <div class="tab" onclick="showTab('chat',this)"><i class="ti ti-message-circle"></i> Live Chat</div>
+    </div>
+
+    <!-- Panel Jadwal -->
+    <div class="panel active" id="panel-schedule">
+      <div class="panel-scroll" id="scheduleEl"></div>
+    </div>
+
+    <!-- Panel Request -->
+    <div class="panel" id="panel-request">
+      <div class="panel-scroll">
+        <div class="req-form">
+          <input type="text" id="reqSong" placeholder="Judul lagu yang ingin direquest...">
+          <input type="text" id="reqArtist" placeholder="Nama artis (opsional)">
+          <input type="text" id="reqName" placeholder="Nama & kota kamu (contoh: Budi di Jogja)">
+          <textarea id="reqMsg" placeholder="Pesan untuk penyiar..."></textarea>
+          <button class="btn-submit" onclick="submitRequest()">📨 Kirim Request</button>
+        </div>
+        <div class="req-list-label">Request masuk</div>
+        <div id="reqListEl"></div>
+      </div>
+    </div>
+
+    <!-- Panel Chat -->
+    <div class="panel" id="panel-chat">
+      <div class="chat-messages" id="chatEl"></div>
+      <div class="chat-input-area">
+        <input type="text" class="chat-input" id="chatInput" placeholder="Tulis pesan ke penyiar..." onkeydown="if(event.key==='Enter') sendChat()">
+        <button class="btn-send" onclick="sendChat()"><i class="ti ti-send"></i></button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- SIDEBAR KANAN: Penyiar -->
+  <aside class="sidebar-right">
+    <div class="dj-on-air">
+      <div class="dj-on-air-label"><span class="live-dot"></span> Penyiar On Air</div>
+      <div class="dj-card">
+        <div class="dj-avatar-big" id="djAvatarBig" style="background:var(--blue)">R</div>
+        <div>
+          <div class="dj-name" id="djName">—</div>
+          <div class="dj-show" id="djShow">—</div>
+        </div>
+      </div>
+      <div class="dj-bio" id="djBio"></div>
+    </div>
+    <div class="section-head"><i class="ti ti-users"></i> Semua Penyiar</div>
+    <div class="dj-list" id="djListEl"></div>
+  </aside>
+
+</div>
+
+<audio id="audioEl" preload="none"></audio>
+
+<script>
+const API = window.location.origin;
+const WS_URL = (location.protocol==='https:'?'wss:':'ws:')+'//'+location.host;
+const STREAM_URL = 'http://192.168.141.41:8000/stream';
+
+let playing = false, muted = false, ws = null;
+let nowPlaying = null, startedAt = null, duration = 0;
+let progressInterval = null;
+let myName = 'Pendengar';
+const myColor = ['#1E6FD9','#00B4D8','#00C9A7','#FFB627','#FF6B9D'][Math.floor(Math.random()*5)];
+
+const audioEl = document.getElementById('audioEl');
+audioEl.src = STREAM_URL;
+audioEl.volume = 0.8;
+
+// ── EQ Bars ──────────────────────────────────────────────────────────────────
+const eqWrap = document.getElementById('eqWrap');
+for(let i=0;i<6;i++){
+  const b = document.createElement('div');
+  b.className = 'eq-bar';
+  b.style.cssText = `height:6px;transition:height ${(0.2+Math.random()*0.3).toFixed(2)}s ease-in-out`;
+  eqWrap.appendChild(b);
+}
+let eqInterval = null;
+function animateEQ(on){
+  clearInterval(eqInterval);
+  if(on) eqInterval = setInterval(()=>{
+    document.querySelectorAll('.eq-bar').forEach(b=>{ b.style.height=(4+Math.random()*22)+'px'; });
+  },250);
+  else document.querySelectorAll('.eq-bar').forEach(b=>{ b.style.height='6px'; });
+}
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+function togglePlay(){
+  playing = !playing;
+  document.getElementById('playIcon').className = playing ? 'ti ti-player-pause' : 'ti ti-player-play';
+  if(playing){ audioEl.play().catch(()=>{}); animateEQ(true); }
+  else { audioEl.pause(); animateEQ(false); }
+}
+function setVolume(v){ audioEl.volume=v/100; muted=false; document.getElementById('muteBtn').querySelector('i').className='ti ti-volume-3'; }
+function toggleMute(){ muted=!muted; audioEl.muted=muted; document.getElementById('muteBtn').querySelector('i').className=muted?'ti ti-volume-off':'ti ti-volume-3'; }
+function shareStation(){ if(navigator.share) navigator.share({title:'Radio Teknologi Informasi',url:location.href}); else { navigator.clipboard.writeText(location.href); alert('Link disalin!'); } }
+
+// ── Progress ──────────────────────────────────────────────────────────────────
+function startProgress(){
+  clearInterval(progressInterval);
+  if(!duration){ document.getElementById('timeDuration').textContent='Live'; document.getElementById('progressFill').style.width='100%'; return; }
+  progressInterval = setInterval(()=>{
+    const elapsed = Math.floor((Date.now()-startedAt)/1000);
+    const pct = Math.min(100,(elapsed/duration)*100);
+    document.getElementById('progressFill').style.width=pct+'%';
+    document.getElementById('timeElapsed').textContent=fmt(elapsed);
+    document.getElementById('timeDuration').textContent=fmt(duration);
+  },1000);
+}
+function fmt(sec){ const m=Math.floor(sec/60),s=sec%60; return m+':'+(s<10?'0':'')+s; }
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderNowPlaying(data){
+  nowPlaying=data; startedAt=data.startedAt; duration=data.duration||0;
+  document.getElementById('songTitle').textContent=data.title||'Radio Teknologi Informasi';
+  document.getElementById('songArtist').textContent=data.artist||(data.genre?data.genre:'');
+  startProgress();
+}
+
+function renderDJ(dj, djList){
+  document.getElementById('djName').textContent=dj.name||'—';
+  document.getElementById('djShow').textContent=dj.show||'—';
+  const av=document.getElementById('djAvatarBig');
+  av.textContent=dj.avatar||dj.name?.[0]||'D';
+  av.style.background=dj.color||'var(--blue)';
+  if(djList){ const me=djList.find(d=>d.name===dj.name); document.getElementById('djBio').textContent=me?.bio||''; }
+}
+
+function renderPlaylist(list){
+  const el=document.getElementById('playlistEl'); el.innerHTML='';
+  list.forEach((s,i)=>{
+    const div=document.createElement('div');
+    div.className='playlist-item'+(nowPlaying&&s.title===nowPlaying.title?' active':'');
+    div.innerHTML=`<div class="pl-num">${i+1}</div><div class="pl-art"><i class="ti ti-music"></i></div><div class="pl-info"><div class="pl-title">${s.title}</div><div class="pl-artist">${s.artist} • ${s.genre}</div></div><div class="pl-meta"><span class="pl-dur">${s.duration}</span><div class="pl-vote" onclick="voteSong(${s.id},this)"><i class="ti ti-heart"></i> ${s.votes}</div></div>`;
+    el.appendChild(div);
+  });
+}
+
+function renderSchedule(list){
+  const el=document.getElementById('scheduleEl'); el.innerHTML='';
+  list.forEach(s=>{
+    let badge='';
+    if(s.status==='on-air') badge='<span class="sch-badge on-air">● Sedang Siaran</span>';
+    else if(s.status==='next') badge='<span class="sch-badge next">Berikutnya</span>';
+    else if(s.status==='done') badge='<span class="sch-badge done">Selesai</span>';
+    const div=document.createElement('div'); div.className='sch-item';
+    div.innerHTML=`<div class="sch-time">${s.time}</div><div class="sch-body"><div class="sch-show">${s.show}</div><div class="sch-dj">Bersama ${s.dj}</div>${badge}</div>`;
+    el.appendChild(div);
+  });
+}
+
+function renderRequests(list){
+  const el=document.getElementById('reqListEl'); el.innerHTML='';
+  list.forEach(r=>{
+    const div=document.createElement('div'); div.className='req-item'; div.dataset.id=r.id;
+    div.innerHTML=`<div><div class="req-song">${r.song}${r.artist?' — '+r.artist:''}</div><div class="req-from">dari ${r.from}</div></div><div class="req-vote-btn" onclick="voteRequest(${r.id},this)"><i class="ti ti-heart"></i> <span>${r.votes}</span></div>`;
+    el.appendChild(div);
+  });
+}
+
+function addChatMsg(msg){
+  const el=document.getElementById('chatEl');
+  const time=new Date(msg.timestamp).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  const div=document.createElement('div'); div.className='chat-msg';
+  div.innerHTML=`<div class="chat-avatar" style="background:${msg.color}">${msg.name[0].toUpperCase()}</div><div class="chat-bubble"><div class="chat-name" style="color:${msg.color}">${msg.name}</div><div class="chat-text">${msg.text}</div><div class="chat-time">${time}</div></div>`;
+  el.appendChild(div);
+  el.scrollTop=el.scrollHeight;
+}
+
+function renderDJList(list){
+  const el=document.getElementById('djListEl'); el.innerHTML='';
+  list.forEach(d=>{
+    const div=document.createElement('div'); div.className='dj-item';
+    div.innerHTML=`<div class="dj-avatar" style="background:${d.color}">${d.avatar}</div><div><div class="dj-item-name">${d.name}</div><div class="dj-item-show">${d.show}</div></div><div class="dj-item-time">${d.time}</div>`;
+    el.appendChild(div);
+  });
+}
+
+// ── API ───────────────────────────────────────────────────────────────────────
+async function submitRequest(){
+  const song=document.getElementById('reqSong').value.trim();
+  if(!song){ alert('Isi judul lagu dulu!'); return; }
+  try {
+    await fetch(`${API}/api/request`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({song,artist:document.getElementById('reqArtist').value.trim(),from:document.getElementById('reqName').value.trim()||'Pendengar setia',message:document.getElementById('reqMsg').value.trim()})});
+    document.getElementById('reqSong').value='';
+    document.getElementById('reqArtist').value='';
+    document.getElementById('reqName').value='';
+    document.getElementById('reqMsg').value='';
+  } catch(e){ console.error(e); }
+}
+
+async function voteRequest(id,el){
+  try { const r=await(await fetch(`${API}/api/request/${id}/vote`,{method:'POST'})).json(); if(r.success) el.querySelector('span').textContent=r.votes; } catch(e){}
+}
+
+async function voteSong(id,el){
+  try { const r=await(await fetch(`${API}/api/playlist/${id}/vote`,{method:'POST'})).json(); if(r.success) el.innerHTML=`<i class="ti ti-heart-filled" style="color:var(--amber)"></i> ${r.votes}`; } catch(e){}
+}
+
+let chatNameAsked = false;
+async function sendChat(){
+  const inp=document.getElementById('chatInput');
+  const text=inp.value.trim(); if(!text) return;
+  if(!chatNameAsked){ const n=prompt('Nama kamu:'); if(n) myName=n; chatNameAsked=true; }
+  try { await fetch(`${API}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:myName,text,color:myColor})}); inp.value=''; } catch(e){ console.error(e); }
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function showTab(id,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+}
+
+// ── WebSocket ─────────────────────────────────────────────────────────────────
+function setConnStatus(on){
+  document.getElementById('connDot').className='conn-dot'+(on?'':' offline');
+  document.getElementById('connText').textContent=on?'Terhubung':'Terputus';
+}
+
+function connectWS(){
+  ws=new WebSocket(WS_URL);
+  ws.onopen=()=>setConnStatus(true);
+  ws.onclose=()=>{ setConnStatus(false); setTimeout(connectWS,3000); };
+  ws.onerror=()=>setConnStatus(false);
+  ws.onmessage=(ev)=>{
+    try {
+      const {type,data}=JSON.parse(ev.data);
+      if(type==='INIT'){
+        renderNowPlaying(data.nowPlaying);
+        renderDJ(data.currentDJ,data.djs);
+        renderPlaylist(data.playlist);
+        renderRequests(data.requests);
+        renderSchedule(data.schedule);
+        renderDJList(data.djs||[]);
+        document.getElementById('listenerCount').textContent=(data.listenerCount||0).toLocaleString('id-ID');
+        data.chatMessages.forEach(addChatMsg);
+      }
+      else if(type==='NOW_PLAYING') renderNowPlaying(data);
+      else if(type==='DJ_CHANGE') renderDJ(data,null);
+      else if(type==='NEW_REQUEST'||type==='UPDATE_REQUEST'){ fetch(`${API}/api/state`).then(r=>r.json()).then(d=>renderRequests(d.requests)); }
+      else if(type==='NEW_CHAT') addChatMsg(data);
+      else if(type==='LISTENER_COUNT') document.getElementById('listenerCount').textContent=(data.count||0).toLocaleString('id-ID');
+      else if(type==='UPDATE_PLAYLIST') renderPlaylist(data);
+      else if(type==='SCHEDULE_UPDATE') renderSchedule(data);
+    } catch(e){}
+  };
+  setInterval(()=>{ if(ws&&ws.readyState===1) ws.send(JSON.stringify({type:'PING'})); },25000);
+}
+
+async function init(){
+  try {
+    const r=await fetch(`${API}/api/state`);
+    const data=await r.json();
+    renderNowPlaying(data.nowPlaying);
+    renderDJ(data.currentDJ,data.djs);
+    renderPlaylist(data.playlist);
+    renderRequests(data.requests);
+    renderSchedule(data.schedule);
+    renderDJList(data.djs||[]);
+    document.getElementById('listenerCount').textContent=(data.listenerCount||0).toLocaleString('id-ID');
+    data.chatMessages.forEach(addChatMsg);
+  } catch(e){ console.log('API belum aktif, mode offline'); }
+  connectWS();
+}
+
+init();
+</script>
+</body>
+</html>

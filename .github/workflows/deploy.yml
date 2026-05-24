@@ -1,0 +1,30 @@
+name: Deploy Radio Teknologi Informasi
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout kode
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install --production
+
+      - name: Sync file ke /var/www/rti
+        run: |
+          rsync -av --exclude='.git' --exclude='node_modules' \
+            ./ /var/www/rti/
+          cd /var/www/rti && npm install --production
+
+      - name: Restart aplikasi
+        run: |
+          pm2 restart rti-web || pm2 start /var/www/rti/server.js --name rti-web
+          pm2 save
+
+      - name: Cek status
+        run: pm2 status rti-web
