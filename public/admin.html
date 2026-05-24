@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — Radio Teknologi Informasi</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.9.0/dist/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1E6FD9;--cyan:#00B4D8;--navy:#0A1628;--navy2:#0D1F3C;
+  --navy3:#132847;--navy4:#1A3560;--accent:#00D4FF;--pink:#FF6B9D;
+  --amber:#FFB627;--teal:#00C9A7;--red:#FF4757;
+  --text:rgba(255,255,255,0.92);--muted:rgba(255,255,255,0.5);
+  --faint:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.09);
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--navy);color:var(--text);min-height:100vh}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#0A1628,#0D2B5E,#1E4D8C)}
+.login-card{background:var(--navy2);border:1px solid var(--border);border-radius:16px;padding:2.5rem;width:360px}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem}
+.login-logo-icon{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center}
+.login-logo-icon i{font-size:22px;color:white}
+.login-title{font-size:16px;font-weight:700;color:white}
+.login-sub{font-size:11px;color:var(--muted)}
+.login-card label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px}
+.login-card input{width:100%;background:var(--faint);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;margin-bottom:14px}
+.login-card input:focus{border-color:var(--accent)}
+.btn-login{width:100%;background:linear-gradient(135deg,var(--blue),var(--cyan));border:none;border-radius:8px;padding:12px;color:white;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.login-err{background:rgba(255,71,87,0.15);border:1px solid rgba(255,71,87,0.3);border-radius:8px;padding:10px 14px;font-size:12px;color:#FF9090;margin-bottom:14px;display:none}
+
+/* ADMIN LAYOUT */
+.admin{display:none;min-height:100vh;flex-direction:column}
+.admin.show{display:flex}
+.topbar{background:var(--navy3);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.topbar-logo{display:flex;align-items:center;gap:10px}
+.topbar-logo-icon{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center}
+.topbar-logo-icon i{font-size:18px;color:white}
+.topbar-name{font-size:13px;font-weight:700;color:white}
+.topbar-sub{font-size:10px;color:var(--muted)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.badge-live{display:flex;align-items:center;gap:5px;background:rgba(255,59,59,0.15);border:1px solid rgba(255,59,59,0.3);border-radius:20px;padding:4px 12px;font-size:11px;color:#FF9090}
+.live-dot{width:6px;height:6px;background:#FF3B3B;border-radius:50%;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.btn-logout{background:var(--faint);border:1px solid var(--border);border-radius:8px;padding:6px 14px;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
+.btn-logout:hover{color:var(--red);border-color:var(--red)}
+
+/* CONTENT */
+.content{flex:1;padding:24px;max-width:1100px;margin:0 auto;width:100%}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-full{grid-column:1/-1}
+
+/* CARDS */
+.card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.card-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.card-head i{font-size:16px;color:var(--accent)}
+.card-title{font-size:13px;font-weight:600;color:white}
+.card-body{padding:18px}
+
+/* FORM */
+.field{margin-bottom:14px}
+.field label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;background:var(--faint);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+.field select option{background:var(--navy3)}
+.field textarea{resize:none;height:72px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* BUTTONS */
+.btn{border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:opacity 0.2s}
+.btn:hover{opacity:0.85}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--cyan));color:white}
+.btn-danger{background:rgba(255,71,87,0.15);border:1px solid rgba(255,71,87,0.3);color:#FF9090}
+.btn-success{background:rgba(0,201,167,0.15);border:1px solid rgba(0,201,167,0.3);color:var(--teal)}
+.btn-full{width:100%;justify-content:center}
+
+/* DJ COLOR PICKER */
+.color-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.2s}
+.color-opt.selected{border-color:white;transform:scale(1.15)}
+
+/* SCHEDULE TABLE */
+.sch-table{width:100%;border-collapse:collapse}
+.sch-table th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.sch-table td{padding:8px 10px;border-bottom:1px solid var(--faint);font-size:12px;vertical-align:middle}
+.sch-table tr:last-child td{border-bottom:none}
+.sch-table input,.sch-table select{background:var(--faint);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:100%}
+.sch-table select option{background:var(--navy3)}
+.status-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px}
+.status-badge.on-air{background:rgba(255,59,59,0.15);color:#FF9090}
+.status-badge.next{background:rgba(255,182,39,0.15);color:var(--amber)}
+.status-badge.upcoming{background:rgba(255,255,255,0.05);color:var(--muted)}
+.status-badge.done{background:rgba(255,255,255,0.05);color:var(--muted)}
+
+/* PLAYLIST TABLE */
+.pl-table{width:100%;border-collapse:collapse}
+.pl-table th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.pl-table td{padding:8px 10px;border-bottom:1px solid var(--faint);font-size:12px;vertical-align:middle}
+.pl-table tr:last-child td{border-bottom:none}
+.pl-table input{background:var(--faint);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:100%}
+
+/* NOW PLAYING */
+.np-card{background:linear-gradient(135deg,var(--navy3),var(--navy4));border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.np-icon{width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.np-icon i{font-size:22px;color:white}
+.np-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px}
+.np-title{font-size:15px;font-weight:600;color:white}
+.np-artist{font-size:12px;color:var(--muted)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;display:flex;align-items:center;gap:8px;transform:translateY(80px);opacity:0;transition:all 0.3s;z-index:999}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:var(--teal);color:var(--teal)}
+.toast.error{border-color:var(--red);color:#FF9090}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.stat-val{font-size:24px;font-weight:700;color:var(--accent);margin-bottom:4px}
+.stat-label{font-size:11px;color:var(--muted)}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon"><i class="ti ti-radio"></i></div>
+      <div>
+        <div class="login-title">Radio Teknologi Informasi</div>
+        <div class="login-sub">Admin Panel</div>
+      </div>
+    </div>
+    <div class="login-err" id="loginErr">Username atau password salah!</div>
+    <label>Username</label>
+    <input type="text" id="loginUser" placeholder="admin" onkeydown="if(event.key==='Enter')doLogin()">
+    <label>Password</label>
+    <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-login" onclick="doLogin()"><i class="ti ti-login"></i> Masuk</button>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin" id="adminPanel">
+
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-logo-icon"><i class="ti ti-radio"></i></div>
+      <div>
+        <div class="topbar-name">Radio Teknologi Informasi</div>
+        <div class="topbar-sub">Admin Panel</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="badge-live"><span class="live-dot"></span> ON AIR</div>
+      <a href="/" target="_blank" class="btn-logout"><i class="ti ti-external-link"></i> Lihat Website</a>
+      <button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> Logout</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="statListeners">—</div>
+        <div class="stat-label">Pendengar Aktif</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statRequests">—</div>
+        <div class="stat-label">Request Masuk</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statChats">—</div>
+        <div class="stat-label">Pesan Chat</div>
+      </div>
+    </div>
+
+    <div class="grid">
+
+      <!-- NOW PLAYING -->
+      <div class="card">
+        <div class="card-head"><i class="ti ti-music"></i><span class="card-title">Sedang Diputar</span></div>
+        <div class="card-body">
+          <div class="np-card">
+            <div class="np-icon"><i class="ti ti-music"></i></div>
+            <div>
+              <div class="np-label">Now Playing</div>
+              <div class="np-title" id="npTitle">—</div>
+              <div class="np-artist" id="npArtist">—</div>
+            </div>
+          </div>
+          <div class="field"><label>Judul Lagu</label><input type="text" id="npTitleIn" placeholder="Nama lagu..."></div>
+          <div class="field-row">
+            <div class="field"><label>Artis</label><input type="text" id="npArtistIn" placeholder="Nama artis..."></div>
+            <div class="field"><label>Genre</label><input type="text" id="npGenreIn" placeholder="Pop, Indie..."></div>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="updateNowPlaying()"><i class="ti ti-player-play"></i> Update Now Playing</button>
+        </div>
+      </div>
+
+      <!-- DJ ON AIR -->
+      <div class="card">
+        <div class="card-head"><i class="ti ti-microphone"></i><span class="card-title">Penyiar On Air</span></div>
+        <div class="card-body">
+          <div class="field"><label>Nama Penyiar</label><input type="text" id="djNameIn" placeholder="Nama penyiar..."></div>
+          <div class="field"><label>Nama Program / Show</label><input type="text" id="djShowIn" placeholder="Morning Vibes..."></div>
+          <div class="field"><label>Bio Singkat</label><textarea id="djBioIn" placeholder="Deskripsi singkat penyiar..."></textarea></div>
+          <div class="field">
+            <label>Warna Avatar</label>
+            <div class="color-opts" id="colorOpts">
+              <div class="color-opt selected" style="background:#1E6FD9" data-color="#1E6FD9" onclick="pickColor(this)"></div>
+              <div class="color-opt" style="background:#00B4D8" data-color="#00B4D8" onclick="pickColor(this)"></div>
+              <div class="color-opt" style="background:#00C9A7" data-color="#00C9A7" onclick="pickColor(this)"></div>
+              <div class="color-opt" style="background:#FFB627" data-color="#FFB627" onclick="pickColor(this)"></div>
+              <div class="color-opt" style="background:#FF6B9D" data-color="#FF6B9D" onclick="pickColor(this)"></div>
+              <div class="color-opt" style="background:#7F77DD" data-color="#7F77DD" onclick="pickColor(this)"></div>
+              <div class="color-opt" style="background:#D4537E" data-color="#D4537E" onclick="pickColor(this)"></div>
+              <div class="color-opt" style="background:#534AB7" data-color="#534AB7" onclick="pickColor(this)"></div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="updateDJ()"><i class="ti ti-check"></i> Set Penyiar On Air</button>
+        </div>
+      </div>
+
+      <!-- JADWAL SIARAN -->
+      <div class="card grid-full">
+        <div class="card-head"><i class="ti ti-calendar"></i><span class="card-title">Jadwal Siaran</span></div>
+        <div class="card-body">
+          <div style="overflow-x:auto">
+            <table class="sch-table" id="schTable">
+              <thead>
+                <tr>
+                  <th>Jam</th>
+                  <th>Nama Program</th>
+                  <th>Penyiar</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="schBody"></tbody>
+            </table>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <button class="btn btn-success" onclick="addScheduleRow()"><i class="ti ti-plus"></i> Tambah Baris</button>
+            <button class="btn btn-primary" onclick="saveSchedule()"><i class="ti ti-device-floppy"></i> Simpan Jadwal</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLAYLIST -->
+      <div class="card grid-full">
+        <div class="card-head"><i class="ti ti-list-numbers"></i><span class="card-title">Playlist</span></div>
+        <div class="card-body">
+          <div style="overflow-x:auto">
+            <table class="pl-table" id="plTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Judul Lagu</th>
+                  <th>Artis</th>
+                  <th>Genre</th>
+                  <th>Durasi</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="plBody"></tbody>
+            </table>
+          </div>
+          <button class="btn btn-success" onclick="addPlaylistRow()" style="margin-top:14px"><i class="ti ti-plus"></i> Tambah Lagu</button>
+        </div>
+      </div>
+
+      <!-- GANTI PASSWORD ADMIN -->
+      <div class="card">
+        <div class="card-head"><i class="ti ti-lock"></i><span class="card-title">Ganti Password Admin</span></div>
+        <div class="card-body">
+          <div class="field"><label>Password Lama</label><input type="password" id="passOld" placeholder="••••••••"></div>
+          <div class="field"><label>Password Baru</label><input type="password" id="passNew" placeholder="••••••••"></div>
+          <div class="field"><label>Konfirmasi Password Baru</label><input type="password" id="passConfirm" placeholder="••••••••"></div>
+          <button class="btn btn-primary btn-full" onclick="changePassword()"><i class="ti ti-key"></i> Ganti Password</button>
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="card">
+        <div class="card-head"><i class="ti ti-bolt"></i><span class="card-title">Quick Actions</span></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-success btn-full" onclick="window.open('/','_blank')"><i class="ti ti-external-link"></i> Buka Website Radio</button>
+          <button class="btn btn-success btn-full" onclick="window.open('http://192.168.141.41:8000','_blank')"><i class="ti ti-radio"></i> Buka SHOUTcast Panel</button>
+          <button class="btn btn-danger btn-full" onclick="clearRequests()"><i class="ti ti-trash"></i> Hapus Semua Request</button>
+          <button class="btn btn-danger btn-full" onclick="clearChat()"><i class="ti ti-trash"></i> Hapus Semua Chat</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = window.location.origin;
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+const ADMIN_KEY = 'rti_admin_auth';
+let CREDENTIALS = JSON.parse(localStorage.getItem(ADMIN_KEY) || '{"user":"admin","pass":"admin123"}');
+
+function doLogin(){
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  if(user === CREDENTIALS.user && pass === CREDENTIALS.pass){
+    sessionStorage.setItem('rti_logged','1');
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('adminPanel').classList.add('show');
+    loadState();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+  }
+}
+
+function doLogout(){
+  sessionStorage.removeItem('rti_logged');
+  location.reload();
+}
+
+function changePassword(){
+  const old = document.getElementById('passOld').value;
+  const n = document.getElementById('passNew').value;
+  const c = document.getElementById('passConfirm').value;
+  if(old !== CREDENTIALS.pass){ showToast('Password lama salah!','error'); return; }
+  if(n !== c){ showToast('Konfirmasi password tidak cocok!','error'); return; }
+  if(n.length < 6){ showToast('Password minimal 6 karakter!','error'); return; }
+  CREDENTIALS.pass = n;
+  localStorage.setItem(ADMIN_KEY, JSON.stringify(CREDENTIALS));
+  showToast('Password berhasil diubah!','success');
+  document.getElementById('passOld').value='';
+  document.getElementById('passNew').value='';
+  document.getElementById('passConfirm').value='';
+}
+
+// Cek sudah login
+if(sessionStorage.getItem('rti_logged')==='1'){
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('adminPanel').classList.add('show');
+}
+
+// ── LOAD STATE ────────────────────────────────────────────────────────────────
+let currentSchedule = [];
+let currentPlaylist = [];
+
+async function loadState(){
+  try {
+    const r = await fetch(`${API}/api/state`);
+    const data = await r.json();
+
+    // Now playing
+    document.getElementById('npTitle').textContent = data.nowPlaying?.title || '—';
+    document.getElementById('npArtist').textContent = data.nowPlaying?.artist || '—';
+    document.getElementById('npTitleIn').value = data.nowPlaying?.title || '';
+    document.getElementById('npArtistIn').value = data.nowPlaying?.artist || '';
+    document.getElementById('npGenreIn').value = data.nowPlaying?.genre || '';
+
+    // DJ
+    document.getElementById('djNameIn').value = data.currentDJ?.name || '';
+    document.getElementById('djShowIn').value = data.currentDJ?.show || '';
+    document.getElementById('djBioIn').value = data.currentDJ?.bio || '';
+    if(data.currentDJ?.color) pickColorByVal(data.currentDJ.color);
+
+    // Stats
+    document.getElementById('statListeners').textContent = data.listenerCount || 0;
+    document.getElementById('statRequests').textContent = data.requests?.length || 0;
+    document.getElementById('statChats').textContent = data.chatMessages?.length || 0;
+
+    // Schedule
+    currentSchedule = data.schedule || [];
+    renderSchedule();
+
+    // Playlist
+    currentPlaylist = data.playlist || [];
+    renderPlaylist();
+
+  } catch(e){ showToast('Gagal load data!','error'); }
+}
+
+// ── NOW PLAYING ───────────────────────────────────────────────────────────────
+async function updateNowPlaying(){
+  const title = document.getElementById('npTitleIn').value.trim();
+  const artist = document.getElementById('npArtistIn').value.trim();
+  const genre = document.getElementById('npGenreIn').value.trim();
+  if(!title){ showToast('Judul lagu wajib diisi!','error'); return; }
+  try {
+    await fetch(`${API}/api/admin/now-playing`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,artist,genre})});
+    document.getElementById('npTitle').textContent = title;
+    document.getElementById('npArtist').textContent = artist;
+    showToast('Now playing diupdate!','success');
+  } catch(e){ showToast('Gagal update!','error'); }
+}
+
+// ── DJ ────────────────────────────────────────────────────────────────────────
+let selectedColor = '#1E6FD9';
+function pickColor(el){
+  document.querySelectorAll('.color-opt').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedColor = el.dataset.color;
+}
+function pickColorByVal(val){
+  document.querySelectorAll('.color-opt').forEach(c=>{
+    c.classList.toggle('selected', c.dataset.color===val);
+  });
+  selectedColor = val;
+}
+
+async function updateDJ(){
+  const name = document.getElementById('djNameIn').value.trim();
+  const show = document.getElementById('djShowIn').value.trim();
+  const bio = document.getElementById('djBioIn').value.trim();
+  if(!name){ showToast('Nama penyiar wajib diisi!','error'); return; }
+  try {
+    await fetch(`${API}/api/admin/dj`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,show,bio,avatar:name[0].toUpperCase(),color:selectedColor})});
+    showToast(`${name} sekarang on air!`,'success');
+  } catch(e){ showToast('Gagal update DJ!','error'); }
+}
+
+// ── SCHEDULE ──────────────────────────────────────────────────────────────────
+function renderSchedule(){
+  const tbody = document.getElementById('schBody');
+  tbody.innerHTML = '';
+  currentSchedule.forEach((s,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="time" value="${s.time}" onchange="currentSchedule[${i}].time=this.value"></td>
+      <td><input type="text" value="${s.show}" placeholder="Nama program..." onchange="currentSchedule[${i}].show=this.value"></td>
+      <td><input type="text" value="${s.dj}" placeholder="Nama penyiar..." onchange="currentSchedule[${i}].dj=this.value"></td>
+      <td>
+        <select onchange="currentSchedule[${i}].status=this.value">
+          <option value="done" ${s.status==='done'?'selected':''}>Selesai</option>
+          <option value="on-air" ${s.status==='on-air'?'selected':''}>On Air</option>
+          <option value="next" ${s.status==='next'?'selected':''}>Berikutnya</option>
+          <option value="upcoming" ${s.status==='upcoming'?'selected':''}>Akan Datang</option>
+        </select>
+      </td>
+      <td><button class="btn btn-danger" onclick="removeScheduleRow(${i})"><i class="ti ti-trash"></i></button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function addScheduleRow(){
+  currentSchedule.push({time:'00:00',show:'Program Baru',dj:'Penyiar',status:'upcoming'});
+  renderSchedule();
+}
+
+function removeScheduleRow(i){
+  currentSchedule.splice(i,1);
+  renderSchedule();
+}
+
+async function saveSchedule(){
+  try {
+    await fetch(`${API}/api/admin/schedule`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({schedule:currentSchedule})});
+    showToast('Jadwal berhasil disimpan!','success');
+  } catch(e){ showToast('Gagal simpan jadwal!','error'); }
+}
+
+// ── PLAYLIST ──────────────────────────────────────────────────────────────────
+function renderPlaylist(){
+  const tbody = document.getElementById('plBody');
+  tbody.innerHTML = '';
+  currentPlaylist.forEach((s,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted)">${i+1}</td>
+      <td><input type="text" value="${s.title}" onchange="currentPlaylist[${i}].title=this.value"></td>
+      <td><input type="text" value="${s.artist}" onchange="currentPlaylist[${i}].artist=this.value"></td>
+      <td><input type="text" value="${s.genre}" onchange="currentPlaylist[${i}].genre=this.value"></td>
+      <td><input type="text" value="${s.duration}" style="width:70px" onchange="currentPlaylist[${i}].duration=this.value"></td>
+      <td><button class="btn btn-danger" onclick="removePlaylistRow(${i})"><i class="ti ti-trash"></i></button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function addPlaylistRow(){
+  currentPlaylist.push({id:Date.now(),title:'',artist:'',genre:'Pop',duration:'0:00',votes:0});
+  renderPlaylist();
+  // scroll ke bawah
+  document.getElementById('plBody').lastElementChild?.scrollIntoView({behavior:'smooth'});
+}
+
+function removePlaylistRow(i){
+  currentPlaylist.splice(i,1);
+  renderPlaylist();
+}
+
+async function savePlaylist(){
+  try {
+    await fetch(`${API}/api/admin/playlist`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({playlist:currentPlaylist})});
+    showToast('Playlist berhasil disimpan!','success');
+  } catch(e){ showToast('Gagal simpan playlist!','error'); }
+}
+
+// ── QUICK ACTIONS ─────────────────────────────────────────────────────────────
+async function clearRequests(){
+  if(!confirm('Hapus semua request?')) return;
+  try {
+    await fetch(`${API}/api/admin/clear-requests`,{method:'POST'});
+    showToast('Request dihapus!','success');
+    loadState();
+  } catch(e){ showToast('Gagal hapus request!','error'); }
+}
+
+async function clearChat(){
+  if(!confirm('Hapus semua chat?')) return;
+  try {
+    await fetch(`${API}/api/admin/clear-chat`,{method:'POST'});
+    showToast('Chat dihapus!','success');
+    loadState();
+  } catch(e){ showToast('Gagal hapus chat!','error'); }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type='success'){
+  const t = document.getElementById('toast');
+  t.textContent = type==='success' ? '✅ '+msg : '❌ '+msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// Auto refresh stats setiap 30 detik
+if(sessionStorage.getItem('rti_logged')==='1') loadState();
+setInterval(()=>{ if(sessionStorage.getItem('rti_logged')==='1') loadState(); },30000);
+</script>
+</body>
+</html>

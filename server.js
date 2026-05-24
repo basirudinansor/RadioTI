@@ -237,3 +237,26 @@ server.listen(CONFIG.port, () => {
   console.log(`\n📡  SHOUTcast: http://${CONFIG.shoutcast.host}:${CONFIG.shoutcast.port}`);
   console.log(`    Stream URL: ${CONFIG.streamUrl}\n`);
 });
+
+// ── ADMIN: update playlist ────────────────────────────────────────────────────
+app.post('/api/admin/playlist', (req, res) => {
+  const { playlist } = req.body;
+  if (!Array.isArray(playlist)) return res.status(400).json({ error: 'Format salah' });
+  state.playlist = playlist;
+  broadcast('UPDATE_PLAYLIST', state.playlist);
+  res.json({ success: true });
+});
+
+// ── ADMIN: clear requests ─────────────────────────────────────────────────────
+app.post('/api/admin/clear-requests', (req, res) => {
+  state.requests = [];
+  broadcast('NEW_REQUEST', null);
+  res.json({ success: true });
+});
+
+// ── ADMIN: clear chat ─────────────────────────────────────────────────────────
+app.post('/api/admin/clear-chat', (req, res) => {
+  state.chatMessages = [];
+  broadcast('NEW_CHAT', null);
+  res.json({ success: true });
+});
