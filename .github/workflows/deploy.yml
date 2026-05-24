@@ -21,10 +21,16 @@ jobs:
             ./ /var/www/rti/
           cd /var/www/rti && npm install --production
 
+      - name: Copy .env jika belum ada
+        run: |
+          if [ ! -f /var/www/rti/.env ]; then
+            cp .env.example /var/www/rti/.env
+          fi
+
       - name: Restart aplikasi
         run: |
           pm2 restart rti-web || pm2 start /var/www/rti/server.js --name rti-web
           pm2 save
 
       - name: Cek status
-        run: pm2 status rti-web
+        run: pm2 status
